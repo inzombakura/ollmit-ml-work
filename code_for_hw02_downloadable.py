@@ -511,8 +511,22 @@ test_perceptron(perceptron)
 def averaged_perceptron(data, labels, params={}, hook=None):
     # if T not in params, default to 100
     T = params.get('T', 100)
-    # Your implementation here
-    pass
+    th = np.zeros(data.shape[0])
+    th0 = 0
+    ths = np.zeros(data.shape[0])
+    th0s = 0
+    for t in range(T):
+        for i in range(data.shape[1]):
+            x = data.T[i]
+            y = labels.T[i]
+            if (y * (np.dot(x, th) + th0) <= 0):
+                th = th + (y*x).T
+                th0 += y
+                if hook:
+                    hook(th,th0)
+            ths = ths + th
+            th0s = th0s + th0
+    return np.reshape(ths / (data.shape[1] * T), (data.shape[0], 1)), np.reshape(th0s / (data.shape[1] * T), (1, 1))
 
 # Visualization of Averaged Perceptron:
 '''
