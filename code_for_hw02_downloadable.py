@@ -550,7 +550,7 @@ def eval_classifier(learner, data_train, labels_train, data_test, labels_test):
 def eval_learning_alg(learner, data_gen, n_train, n_test, it):
     res = 0.0
     for i in range(it):
-        train_data, train_labels = data_gen(n_test)
+        train_data, train_labels = data_gen(n_train)
         test_data, test_labels = data_gen(n_test)
         res += eval_classifier(learner, train_data, train_labels, test_data, test_labels)
     return res / it
