@@ -505,7 +505,7 @@ for datafn in (super_simple_separable_through_origin,super_simple_separable):
 '''
 
 #Test Cases:
-test_perceptron(perceptron)
+#test_perceptron(perceptron)
 
 
 def averaged_perceptron(data, labels, params={}, hook=None):
@@ -539,21 +539,51 @@ for datafn in (super_simple_separable, xor, xor_more, big_higher_dim_separable):
 #test_averaged_perceptron(averaged_perceptron)
 
 def eval_classifier(learner, data_train, labels_train, data_test, labels_test):
-    pass
+    thtrain, th0train = learner(data_train, labels_train)
+    train_score = score(data_test, labels_test, thtrain, th0train)
+    return train_score * 1.0 / data_test.shape[1]
 
 #Test cases:
 #test_eval_classifier(eval_classifier,perceptron)
 
 
 def eval_learning_alg(learner, data_gen, n_train, n_test, it):
-    pass
+    res = 0.0
+    for i in range(it):
+        train_data, train_labels = data_gen(n_test)
+        test_data, test_labels = data_gen(n_test)
+        res += eval_classifier(learner, train_data, train_labels, test_data, test_labels)
+    return res / it
 
 #Test cases:
 #test_eval_learning_alg(eval_learning_alg,perceptron)
 
 
 def xval_learning_alg(learner, data, labels, k):
-    pass
+    divided_data = np.array_split(data, k, axis=1)
+    divided_labels = np.array_split(labels, k, axis=1)
+    res = 0
+    #cross validation of learning algorithm
+    for i in range(len(divided_data)):
+        test_data = divided_data[i]
+        test_labels = divided_labels[i]
+        train_data = []
+        train_labels = []
+        if (i == 0):
+            train_data = np.concatenate(divided_data[i+1:len(divided_data)], axis=1)
+            train_labels = np.concatenate(divided_labels[i+1:len(divided_data)], axis=1)
+        elif (i == len(divided_data) - 1):
+            train_data = np.concatenate(divided_data[0:i], axis=1)
+            train_labels = np.concatenate(divided_labels[0:i], axis=1)
+        else:
+            train_data_left = np.concatenate(divided_data[0:i], axis=1)
+            train_labels_left = np.concatenate(divided_labels[0:i], axis=1)
+            train_data_right = np.concatenate(divided_data[i+1:len(divided_data)], axis=1)
+            train_labels_right = np.concatenate(divided_labels[i+1:len(divided_data)], axis=1)
+            train_data = np.concatenate((train_data_left, train_data_right), axis=1)
+            train_labels = np.concatenate((train_labels_left, train_labels_right), axis=1)
+        res += eval_classifier(learner, train_data, train_labels, test_data, test_labels)
+    return res / k
 
 #Test cases:
 #test_xval_learning_alg(xval_learning_alg,perceptron)
